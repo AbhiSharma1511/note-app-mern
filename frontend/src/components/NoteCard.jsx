@@ -21,7 +21,7 @@ const NoteCard = ({data}) => {
         <div className='flex justify-around items-center text-lg gap-4'>
             <MdCreate className='icon-btn hover:hover:text-blue-600 hover:text-xl' onClick={onEdit}/>
             <MdDelete className='icon-btn hover:hover:text-blue-600 hover:text-xl' onClick={onDelete}/>
-            <MdEdit className='icon-btn hover:hover:text-blue-600 hover:text-xl' onClick={onEdit}/>
+            {/* <MdEdit className='icon-btn hover:hover:text-blue-600 hover:text-xl' onClick={onEdit}/> */}
         </div>
       </div>
     </div>
