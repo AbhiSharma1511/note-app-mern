@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import Navbar from "../components/Navbar.jsx";
-import Searchbar from "../components/Searchbar.jsx";
 import NoteCard from "../components/NoteCard.jsx";
 import { MdAdd } from "react-icons/md";
 import AddEditNotes from "./AddEditNotes.jsx";
@@ -80,7 +79,9 @@ const Home = () => {
         contentLabel=""
         className={`min-w-min`}
       >
-        <AddEditNotes addBtnClicked={addItemDiv} />
+        <AddEditNotes addBtnClicked={addItemDiv} onClose={()=>{
+          setAddItemDiv({isShown:false, type:"Add New", data:null})
+        }} />
       </Modal>
     </>
   );
