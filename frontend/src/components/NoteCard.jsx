@@ -16,7 +16,7 @@ const NoteCard = ({data}) => {
         />
       </div>
       <p className="text-gray-600">{data.content?.slice(0, 60)}</p>
-      <div className='flex justify-between'>
+      <div className='flex justify-between mt-2'>
         <div className='text-sm text-slate-500'>{tags}</div>
         <div className='flex justify-around items-center text-lg gap-4'>
             <MdCreate className='icon-btn hover:hover:text-blue-600 hover:text-xl' onClick={onEdit}/>
