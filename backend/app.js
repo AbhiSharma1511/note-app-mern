@@ -3,6 +3,7 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const app = express();
 const User = require("./src/models/user.models.js");
+const Note = require("./src/models/note.model.js");
 
 const jwt = require("jsonwebtoken");
 const { authenticationToken } = require("./src/middlewares/auth.middleware.js");
@@ -111,6 +112,97 @@ app.post("/login", async (req, res) => {
       error: true,
       message: "Invalid Credentials",
     });
+  }
+});
+// Add Note
+app.post("/add-note", authenticationToken, async (req, res) => {
+  const { title, content, tags } = req.body;
+
+  const { user } = req.user;
+
+  if (!title || !content) {
+    return res
+      .status(400)
+      .json({ error: true, message: "Fields are required!!" });
+  }
+  try {
+    const note = new Note({
+      title,
+      content,
+      tags: tags || [],
+      userId: user._id,
+    });
+
+    await note.save();
+    return res
+      .status(200)
+      .json({ error: true, note, message: "Note created successfully" });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ error: true, message: `Server error: ${error}` });
+  }
+});
+//edit note
+app.post("/edit-note/noteId", authenticationToken, async (req, res) => {
+  const noteId = req.query.id;
+  const { title, content, tags, isPinned } = req.body;
+  const { user } = req.user;
+
+  // console.log(noteId);
+
+  const updateFields = {};
+  if (title) updateFields.title = title;
+  if (content) updateFields.content = content;
+  if (tags) updateFields.tags = tags;
+  if (isPinned !== undefined) updateFields.isPinned = isPinned;
+
+  if (Object.keys(updateFields).length === 0) {
+    return res
+      .status(400)
+      .json({ error: true, message: `No changes provided` });
+  }
+  try {
+    const note = await Note.findByIdAndUpdate(
+      {
+        _id: noteId,
+        userId: user._id,
+      },
+      updateFields,
+      { new: true }
+    );
+
+    if (!note) {
+      console.log(note);
+      return res.status(400).json({ error: true, message: `Note not found` });
+    }
+
+    return res
+      .status(200)
+      .json({ error: false, note, message: "Note updated succeefully" });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: true, message: `No change provided` });
+  }
+});
+// get all note
+app.get("/get-all-notes", authenticationToken, async (req, res) => {
+  const {user} = req.user;
+  // console.log(user._id);
+  try {
+    const notes = await Note.find({ userId: user._id }).sort({ isPinned: -1 });
+    if (!notes) {
+      // console.log(notes);
+      return res
+        .status(400)
+        .json({ error: true, message: "Any note not found for this user" });
+    }
+    // console.log(notes);
+    return res
+      .status(200)
+      .json({ error: false, notes, message: "Notes fetch successfully" });
+  } catch (error) {
+    return res.status(500).json({ error: false, message: "Server error" });
   }
 });
 
