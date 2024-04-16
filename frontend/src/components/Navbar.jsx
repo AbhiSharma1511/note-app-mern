@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import ProfileInfo from "./ProfileInfo";
 import Searchbar from "./Searchbar";
 
-const Navbar = () => {
+const Navbar = ({user}) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const user = { firstName: "Abhinav", lastName: "Sharma" };
+  // console.log(user);
 
   const handleSearch = () => {
     // Implement search functionality here

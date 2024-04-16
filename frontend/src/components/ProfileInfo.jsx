@@ -1,16 +1,24 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
-const ProfileInfo = ({ user }) => {
+const ProfileInfo = ({ user}) => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
-  const { firstName, lastName } = user;
-  const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`;
+  // console.log(user);
+  const {fullName} = user
+  // console.log(fullName);
+  const initials = `${fullName.charAt(0)}`;
 
   const toggleMenu = () => {
     console.log("button clicked: ", menuOpen);
     setMenuOpen(!menuOpen);
   };
+
+  const logoutHandle = ()=>{
+    localStorage.clear();
+    navigate("/login");
+  }
 
   return (
     <div className="flex items-center justify-between text-white sm:mr-10 mr-2">
@@ -28,21 +36,23 @@ const ProfileInfo = ({ user }) => {
           >
             <div className="p-4 font-semibold">
               <h1 className="text-lg text-gray-600 hover:text-black">
-                {firstName} {lastName}
+                {fullName}
+                {/* {firstName} {lastName} */}
               </h1>
-              <Link to="/login" className="hover:text-red-600  text-red-300 text-lg">
+              <button onClick={logoutHandle} className="hover:text-red-600  text-red-300 text-lg">
                 Logout
-              </Link>
+              </button>
             </div>
           </div>
         )}
         <div className="text-center hidden sm:block">
           <h1 className="text-lg font-semibold">
-            {firstName} {lastName}
+            {fullName}
+            {/* {firstName} {lastName} */}
           </h1>
-          <Link to="/login" className="text-white hover:text-gray-300">
+          <button onClick={logoutHandle} className="text-white hover:text-gray-300">
             Logout
-          </Link>
+          </button>
         </div>
       </div>
     </div>

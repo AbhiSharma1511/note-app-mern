@@ -1,9 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Navbar from "../components/Navbar.jsx";
 import NoteCard from "../components/NoteCard.jsx";
 import { MdAdd } from "react-icons/md";
 import AddEditNotes from "./AddEditNotes.jsx";
 import Modal from "react-modal";
+import axios from "axios";
+import axiosInstance from "../utils/axiosInstance.js";
+import { Navigate, useNavigate } from "react-router-dom";
 
 const Home = () => {
   const data = [
@@ -45,6 +48,39 @@ const Home = () => {
     },
   ];
 
+  const [userInfo, setUserInfo] = useState(null);
+  const navigate = useNavigate();
+
+  //for fetching all notes
+  
+
+  // for getting user data
+  const getUserInfo = async () => {
+    try {
+      const response = await axiosInstance.get("/get-user");
+      if (response.data && response.data.user) {
+        // console.log(response);
+        // console.log(response.data.user);
+        // console.log(response.data.user.fullName);
+        setUserInfo(response.data.user);
+      }
+    } catch (error) {
+      console.log(error);
+      if(error.response.status == 401){
+        localStorage.clear();
+        navigate("/login")
+      }
+    }
+  }
+  // get all notes
+  const getAllNotes = async ()=>{
+    
+  }
+
+  useEffect(() => {
+    getUserInfo();
+  }, []);
+
   const [addItemDiv, setAddItemDiv] = useState({
     isShown: false,
     type: "",
@@ -54,11 +90,13 @@ const Home = () => {
   const addToggleButton = () => {
     setAddItemDiv({ isShown: true, type: "Add New", data: null });
   };
-  const editToggleButton = () => {};
+  const editToggleButton = () => {
+    setAddItemDiv({ isShown: true, type: "Edit Note", data: null });
+  };
 
   return (
     <>
-      <Navbar className="" />
+      <Navbar user = {userInfo}/>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4">
         {data.map((item) => (
           <div key={item.id} className="mb-4">
@@ -79,9 +117,12 @@ const Home = () => {
         contentLabel=""
         className={`min-w-min`}
       >
-        <AddEditNotes addBtnClicked={addItemDiv} onClose={()=>{
-          setAddItemDiv({isShown:false, type:"Add New", data:null})
-        }} />
+        <AddEditNotes
+          addBtnClicked={addItemDiv}
+          onClose={() => {
+            setAddItemDiv({ isShown: false, type: "Add New", data: null });
+          }}
+        />
       </Modal>
     </>
   );

@@ -1,23 +1,56 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import bgImage from "../assets/bgImage.jpg";
+import axiosInstance from "../utils/axiosInstance.js";
+
 
 const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const[error, setError] = useState(null);
+
+  const navigate = useNavigate();
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
-    // Handle sign-up logic here
-    console.log("Form submitted");
+      const data = {
+        email: email,
+        fullName: name,
+        password: password
+      }
+      // console.log(data);
+      // login api call
+      try {
+        const response = await axiosInstance.post("/create-user", data);
+        // successfull
+        // console.log(response)
+        if(response.data && response.data.error){
+          setError(response.data.message)
+          return;
+        }
+
+        if(response.data && response.data.accessToken){
+          localStorage.setItem("token", response.data.accessToken);
+          navigate(("/home"))
+        }
+      } catch (error) {
+        // console.log(error.response.data.message);
+        if((error.response && error.response.data && error.response.data.message)){
+          setError(error.response.data.message);
+        }
+        else{
+          setError("An unexpected error occurred, please try again!");
+        }
+    // console.log("Form submitted");
   };
+};
 
   return (
     <>
@@ -90,6 +123,7 @@ const SignUp = () => {
                   {showPassword ? "👁️" : "🙈"}
                 </button>
               </div>
+              {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
             </div>
             <button
               type="submit"
@@ -98,7 +132,7 @@ const SignUp = () => {
               Sign Up
             </button>
           </form>
-          <p className="text-sm mt-4 flex">
+          <h2 className="text-sm mt-4 flex">
             Already have an account?{" "}
             <Link to="/login">
               <h2 className="text-blue-500 hover:underline font-semibold ml-2">
@@ -106,7 +140,7 @@ const SignUp = () => {
                 Login
               </h2>
             </Link>
-          </p>
+          </h2>
         </div>
       </div>
     </>

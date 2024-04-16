@@ -37,7 +37,7 @@ app.post("/create-user", async (req, res) => {
     if (isUser) {
       return res.status(409).json({
         error: true,
-        messgae: "User already exist",
+        message: "Email already registered, login with credentials",
       });
     }
 

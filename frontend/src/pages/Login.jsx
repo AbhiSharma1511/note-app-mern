@@ -1,13 +1,46 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import bgImage from "../assets/bgImage.jpg";
+import axios from "axios";
+import axiosInstance from "../utils/axiosInstance";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const navigate  = useNavigate();
+  const[error, setError] = useState(null)
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
+  };
+
+  const handleLogin = async (e) => {
+    // e.prevantDefault();
+    const data = {
+      email: email,
+      password: password
+    }
+    // console.log(data);
+    // login api call
+    try {
+      // const response = await axios.post("http://localhost:5000/login",data);
+      const response = await axiosInstance.post("/login",data);
+      // successfull
+      // console.log(response)
+      if(response.data && response.data.accessToken){
+        localStorage.setItem("token", response.data.accessToken);
+        localStorage.setItem("email", response.data.email);
+        navigate("/home")
+      }
+    } catch (error) {
+      if((error.response && error.response.data && error.response.data.message)){
+        setError(error.response.data.message);
+      }
+      else{
+        setError("An unexpected error occurred, please try again!");
+      }
+    }
   };
 
   return (
@@ -18,7 +51,7 @@ const Login = () => {
       >
         <div className="bg-white p-8 rounded-lg shadow-md w-full sm:w-96">
           <h2 className="text-2xl font-semibold mb-6 text-center">Login</h2>
-          <form className="space-y-4">
+          <div className="space-y-4">
             <div>
               <label
                 htmlFor="email"
@@ -30,6 +63,7 @@ const Login = () => {
                 type="email"
                 id="email"
                 name="email"
+                onChange={(e) => setEmail(e.target.value)}
                 className="mt-1 p-2 w-full rounded-md border border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
                 placeholder="Enter your email"
                 required
@@ -61,6 +95,7 @@ const Login = () => {
                   {showPassword ? "👁️" : "🙈"}
                 </button>
               </div>
+              {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center">
@@ -76,11 +111,12 @@ const Login = () => {
             <button
               type="button"
               className="w-full mt-4 p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-500 focus:ring-opacity-50 font-bold"
+              onClick={handleLogin}
             >
               Login
             </button>
-          </form>
-          <p className="text-sm mt-4 flex">
+          </div>
+          <h2 className="text-sm mt-4 flex">
             Don't have an account?{" "}
             <Link to="/signup">
               <h2 className="text-blue-500 hover:underline font-semibold ml-2">
@@ -88,7 +124,7 @@ const Login = () => {
                 SignUp
               </h2>
             </Link>
-          </p>
+          </h2>
         </div>
       </div>
     </>
