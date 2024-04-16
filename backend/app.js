@@ -114,6 +114,21 @@ app.post("/login", async (req, res) => {
     });
   }
 });
+// get user
+app.get("/get-user", authenticationToken, async (req, res) => {
+  const { user } = req.user;
+  const isUser = await User.findOne({ _id: user._id });
+
+  if (!isUser) {
+    return res.status(400).json({ error: true, message: "User not found" });
+  }
+
+  return res.status(200).json({
+    error: false,
+    user: isUser,
+    message: "User data fetch successfully",
+  });
+});
 // Add Note
 app.post("/add-note", authenticationToken, async (req, res) => {
   const { title, content, tags } = req.body;
@@ -144,7 +159,7 @@ app.post("/add-note", authenticationToken, async (req, res) => {
   }
 });
 //edit note
-app.post("/edit-note/noteId", authenticationToken, async (req, res) => {
+app.put("/edit-note/noteId", authenticationToken, async (req, res) => {
   const noteId = req.query.id;
   const { title, content, tags, isPinned } = req.body;
   const { user } = req.user;
@@ -187,7 +202,7 @@ app.post("/edit-note/noteId", authenticationToken, async (req, res) => {
 });
 // get all note
 app.get("/get-all-notes", authenticationToken, async (req, res) => {
-  const {user} = req.user;
+  const { user } = req.user;
   // console.log(user._id);
   try {
     const notes = await Note.find({ userId: user._id }).sort({ isPinned: -1 });
@@ -205,5 +220,72 @@ app.get("/get-all-notes", authenticationToken, async (req, res) => {
     return res.status(500).json({ error: false, message: "Server error" });
   }
 });
+// delete note
+app.delete("/delete-note/noteId", authenticationToken, async (req, res) => {
+  const noteId = req.query.id;
+  const { user } = req.user;
+
+  try {
+    const note = await Note.findOneAndDelete({ _id: noteId, userId: user._id });
+    if (!note)
+      return res
+        .status(400)
+        .json({ error: true, message: "Note not found!!!" });
+    return res
+      .status(200)
+      .json({ error: false, note, message: "Note deleted successfully" });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ error: true, error, message: `Server error: ${error}` });
+  }
+});
+// update isPinned value
+app.put(
+  "/update-note-isPinned/noteId",
+  authenticationToken,
+  async (req, res) => {
+    const noteId = req.query.id;
+    const { isPinned } = req.body;
+    const { user } = req.user;
+
+    // console.log(noteId);
+
+    const updateFields = {};
+    if (isPinned) updateFields.isPinned = isPinned;
+
+    if (Object.keys(updateFields).length === 0) {
+      return res
+        .status(400)
+        .json({ error: true, message: `No changes provided` });
+    }
+    try {
+      const note = await Note.findByIdAndUpdate(
+        {
+          _id: noteId,
+          userId: user._id,
+        },
+        updateFields,
+        { new: true }
+      );
+
+      if (!note) {
+        console.log(note);
+        return res.status(400).json({ error: true, message: `Note not found` });
+      }
+
+      return res.status(200).json({
+        error: false,
+        note,
+        message: "Note isPinned updated succeefully",
+      });
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(500)
+        .json({ error: true, message: `Server Error: ${error}` });
+    }
+  }
+);
 
 module.exports = app;
