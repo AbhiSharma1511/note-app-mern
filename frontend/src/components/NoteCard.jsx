@@ -1,27 +1,49 @@
-import React from 'react';
-import { MdOutlinePushPin, MdCreate, MdDelete, MdEdit } from 'react-icons/md';
+import React from "react";
+import { MdOutlinePushPin, MdCreate, MdDelete } from "react-icons/md";
+import moment from "moment";
 
-const NoteCard = ({data}) => {
-    const { title, date, content, tags, isPinned, onEdit, onDelete, onPinNote } = data
+const NoteCard = ({ data, onEdit, onDelete, onPinNote }) => {
+  const { title, content, tags, isPinned } = data;
   return (
     <div className="bg-white rounded-lg shadow-md hover:shadow-lg p-4 mb-4 min-w-min ease-in-out">
       <div className="flex justify-between items-center mb-2">
         <div className="flex flex-col">
-          <h6 className="text-lg font-semibold text-gray-800">{data.title}</h6>
-          <span className="text-xs text-gray-500">{data.date}</span>
+          <h6 className="text-lg font-semibold text-gray-800">{title}</h6>
+          <div className="gap-3 flex ">
+            <span className="text-xs text-gray-500">
+              Created At : {moment(data.createdAt).fromNow()}
+            </span>
+            <span className="text-xs text-gray-500">
+              Updated At : {moment(data.updatedAt).fromNow()}
+            </span>
+          </div>
         </div>
-        <MdOutlinePushPin 
-          className={`text-xl icon-btn ${isPinned ? 'text-blue-500' : 'text-gray-400'}`}
+        <MdOutlinePushPin
+          className={`text-xl icon-btn ${
+            isPinned ? "text-blue-500" : "text-gray-400"
+          }`}
           onClick={onPinNote}
         />
       </div>
-      <p className="text-gray-600">{data.content?.slice(0, 60)}</p>
-      <div className='flex justify-between mt-2'>
-        <div className='text-sm text-slate-500'>{tags}</div>
-        <div className='flex justify-around items-center text-lg gap-4'>
-            <MdCreate className='icon-btn hover:hover:text-blue-600 hover:text-xl' onClick={onEdit}/>
-            <MdDelete className='icon-btn hover:hover:text-blue-600 hover:text-xl' onClick={onDelete}/>
-            {/* <MdEdit className='icon-btn hover:hover:text-blue-600 hover:text-xl' onClick={onEdit}/> */}
+      <p className="text-gray-600">{content?.slice(0, 60)}</p>
+      <div className="flex justify-between mt-2">
+        <div className="text-sm text-slate-500 flex gap-2">
+          {tags.map((tag, index) => {
+            if (index === tags.length - 1)
+              return <h2 key={index}>{`#${tag} `}</h2>;
+            else return <h2 key={index}>{`#${tag}, `}</h2>;
+          })}
+        </div>
+        <div className="flex justify-around items-center text-lg gap-4">
+          <MdCreate
+            className="icon-btn hover:hover:text-blue-600 hover:text-xl"
+            onClick={onEdit}
+          />
+          <MdDelete
+            className="icon-btn hover:hover:text-blue-600 hover:text-xl"
+            onClick={onDelete}
+          />
+          {/* <MdEdit className='icon-btn hover:hover:text-blue-600 hover:text-xl' onClick={onEdit}/> */}
         </div>
       </div>
     </div>

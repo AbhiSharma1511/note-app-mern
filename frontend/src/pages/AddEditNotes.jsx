@@ -1,33 +1,41 @@
 import React, { useState } from "react";
 import { MdAdd, MdClose, MdRemove } from "react-icons/md";
 import { IoMdClose } from "react-icons/io";
+import axiosInstance from "../utils/axiosInstance";
 
-const AddEditNotes = ({ addBtnClicked , onClose}) => {
+const AddEditNotes = ({ getAllNotes, addBtnClicked, onClose }) => {
   const { isShown, type, data } = addBtnClicked;
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
+  // console.log(data?.title);
+  // console.log(data?.content);
+  const [title, setTitle] = useState(data?.title || "");
+  const [content, setContent] = useState(data?.content || "");
   const [tag, setTag] = useState("");
-  const [tags, setTags] = useState(["#meeting", "#gym"]);
+  const [tags, setTags] = useState(data?.tags || ["meeting"]);
+  const [error, setError] = useState();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Title:", title);
-    console.log("Content:", content);
-    console.log("Tags:", tags);
-    setTitle("");
-    setContent("");
-    setTags(["#meeting", "#gym"]);
+  const handleAddNoteBtn = () => {
+    // console.log(type);
+    if (title.trim() || content.trim()) {
+      addNewNote();
+      onClose();
+    } else {
+      setError("Fields are required!!!");
+    }
+  };
 
-    if(type === "ADD NEW"){
-        addNewNote();
-    }else{
-        editNote();
+  const handleEditNoteBtn = () => {
+    // console.log(type);
+    if (title.trim() || content.trim()) {
+      editNote();
+      onClose();
+    } else {
+      setError("Fields are required!!!");
     }
   };
 
   const addTag = () => {
     if (tag.trim() !== "") {
-      setTags([...tags, "#" + tag]);
+      setTags([...tags, tag]);
       setTag("");
     }
   };
@@ -35,15 +43,58 @@ const AddEditNotes = ({ addBtnClicked , onClose}) => {
     setTags(tags.filter((tag) => tag !== tagToRemove));
   };
 
-  const editNote = async()=>{
-    
-  }
+  const editNote = async () => {
+    const requestData = {
+      title,
+      content,
+      tags,
+    };
+    try {
+      const response = await axiosInstance.put(
+        `edit-note/noteId?id=${data._id}`,
+        requestData
+      );
+      if (response.data && response.data.note) {
+        getAllNotes();
+        onClose();
+      }
+    } catch (error) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        setError(error.response.data.message); // Set error message from response
+      } else {
+        setError("Unexpected error happened!!!");
+      }
+    }
+  };
 
-  const addNewNote = async()=>{
-
-  }
-
-
+  const addNewNote = async () => {
+    const requestData = {
+      title,
+      content,
+      tags,
+    };
+    try {
+      const response = await axiosInstance.post("/add-note", requestData);
+      if (response.data && response.data.note) {
+        getAllNotes();
+        onClose();
+      }
+    } catch (error) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        setError(error.response.data.message); // Set error message from response
+      } else {
+        setError("Unexpected error happened!!!");
+      }
+    }
+  };
 
   return (
     isShown && (
@@ -52,12 +103,14 @@ const AddEditNotes = ({ addBtnClicked , onClose}) => {
         className="fixed top-0 left-0 w-full h-full flex items-center justify-center"
       >
         <div className="sm:w-96 w-64 rounded-lg shadow-md hover:shadow-lg p-4 absolute bg-gray-200">
-            <div className="flex justify-around text-lg">
-                <h1 className="text-2xl mb-4 font-semibold">{type} Note</h1>
-                <button className="ml-auto text-red-500" onClick={onClose}><MdClose/></button>
-            </div>
-          
-          <form onSubmit={handleSubmit}>
+          <div className="flex justify-around text-lg">
+            <h1 className="text-2xl mb-4 font-semibold">{type} Note</h1>
+            <button className="ml-auto text-red-500" onClick={onClose}>
+              <MdClose />
+            </button>
+          </div>
+
+          <div>
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700">
                 TITLE
@@ -89,17 +142,14 @@ const AddEditNotes = ({ addBtnClicked , onClose}) => {
                 <label className="block text-sm font-medium text-gray-700 mr-4">
                   TAGS:
                 </label>
-                <div className="flex gap-3 ">
+                <div className="gap-2 inline-flex flex-wrap">
                   {tags.map((tag, index) => (
                     <span
                       key={index}
                       className="text-md text-black flex items-center px-2 font-semibold  bg-gray-100 rounded-md"
                     >
-                      {tag}
-                      <button
-                        type="button"
-                        onClick={() => removeTag(tags[tags.length - 1])}
-                      >
+                      {`#${tag}`}
+                      <button type="button" onClick={() => removeTag(tag)}>
                         <IoMdClose className="text-md ml-1" />
                       </button>
                     </span>
@@ -119,16 +169,20 @@ const AddEditNotes = ({ addBtnClicked , onClose}) => {
                   <MdAdd className="text-2xl hover:text-blue-600" />
                 </button>
               </div>
+              {error && (
+                <p className="text-red-500 text-sm mt-2 text-center">{error}</p>
+              )}
             </div>
             <div className="flex justify-center">
               <button
-                type="submit"
+                type="button"
+                onClick={type == "ADD" ? handleAddNoteBtn : handleEditNoteBtn}
                 className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
               >
-                Add Note
+                {`${type== "Edit" ? "Update" : "Add"} Note`}
               </button>
             </div>
-          </form>
+          </div>
         </div>
       </div>
     )

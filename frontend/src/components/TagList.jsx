@@ -9,8 +9,8 @@ const TagList = ({ tags }) => {
     <div>
       <div className="flex gap-1">
         {tags.map((tag, index) => {
-          if (index === tags.length - 1) return <h2 key={index}>{tag}</h2>;
-          else return <h2 key={index}>{tag}, </h2>;
+          if (index === tags.length - 1) return <h2 key={index}>{`#${tag} `}</h2>;
+          else return <h2 key={index}>{`#${tag}, `}</h2>;
         })}
       </div>
     </div>

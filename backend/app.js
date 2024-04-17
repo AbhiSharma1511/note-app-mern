@@ -178,7 +178,7 @@ app.put("/edit-note/noteId", authenticationToken, async (req, res) => {
       .json({ error: true, message: `No changes provided` });
   }
   try {
-    const note = await Note.findByIdAndUpdate(
+    const note = await Note.findOneAndUpdate(
       {
         _id: noteId,
         userId: user._id,
