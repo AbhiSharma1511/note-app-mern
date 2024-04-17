@@ -22,6 +22,7 @@ const Home = () => {
     type: "",
     data: null,
   });
+  const [isSearch, setIsSearch] = useState(false);
 
   const handleEdit = (noteDetails) => {
     setAddItemDiv({ isShown: true, type: "Edit", data: noteDetails });
@@ -41,6 +42,27 @@ const Home = () => {
       console.log(error.message);
       setError(error.message);
     }
+  };
+
+  // search for note
+  const onSearchNotes = async (query) => {
+    // console.log(query);
+    try {
+      const response = await axiosInstance.get(
+        `/search-notes/query?search=${query}`
+      );
+      if (response.data && response.data.matchNotes) {
+        setIsSearch(true);
+        setAllNotes(response.data.matchNotes);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleClearSearch = async () => {
+    setIsSearch(false);
+    getAllNotes();
   };
 
   // for getting user data
@@ -73,6 +95,24 @@ const Home = () => {
       setError(error.message);
     }
   };
+  const handlePinned = async (data) => {
+    const noteId = data._id;
+    const isPinned = !data.isPinned;
+    try {
+      const response = await axiosInstance.put(
+        `/update-note-isPinned/noteId?id=${noteId}`,
+        {isPinned}
+      );
+      if (response.data && response.data.note) {
+        console.log(response.data.note.isPinned);
+        showToastMessage("Note Update Successfully");
+        getAllNotes();
+      }
+    } catch (error) {
+      console.log(error.message);
+      setError(error.message);
+    }
+  };
 
   useEffect(() => {
     getAllNotes();
@@ -92,7 +132,11 @@ const Home = () => {
 
   return (
     <>
-      <Navbar user={userInfo} />
+      <Navbar
+        user={userInfo}
+        onSearchNotes={onSearchNotes}
+        handleClearSearch={handleClearSearch}
+      />
       {error ? (
         <div>
           {" "}
@@ -107,12 +151,14 @@ const Home = () => {
                   data={item}
                   onEdit={() => handleEdit(item)}
                   onDelete={() => handleDelete(item)}
-                  onPinNote={() => {}}
+                  onPinNote={() => {
+                    handlePinned(item);
+                  }}
                 />
               </div>
             ))
           ) : (
-            <EmptyCard />
+            <EmptyCard isSearch={isSearch} />
           )}
         </div>
       )}

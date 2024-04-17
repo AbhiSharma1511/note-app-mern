@@ -2,16 +2,21 @@ import React, { useState } from "react";
 import ProfileInfo from "./ProfileInfo";
 import Searchbar from "./Searchbar";
 
-const Navbar = ({user}) => {
+const Navbar = ({user, onSearchNotes, handleClearSearch}) => {
   const [searchQuery, setSearchQuery] = useState("");
   // console.log(user);
 
   const handleSearch = () => {
     // Implement search functionality here
+    // console.log(searchQuery);
+    // if(searchQuery=="") {handleClearSearch();}
+    if(searchQuery.trim()){
+    onSearchNotes(searchQuery)}
   };
 
   const onClearSearch = () => {
     setSearchQuery("");
+    handleClearSearch();
   };
 
   return (

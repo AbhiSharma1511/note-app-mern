@@ -246,26 +246,17 @@ app.put(
   authenticationToken,
   async (req, res) => {
     const noteId = req.query.id;
-    const { isPinned } = req.body;
+    const  {isPinned}  = req.body;
     const { user } = req.user;
 
     // console.log(noteId);
-
-    const updateFields = {};
-    if (isPinned) updateFields.isPinned = isPinned;
-
-    if (Object.keys(updateFields).length === 0) {
-      return res
-        .status(400)
-        .json({ error: true, message: `No changes provided` });
-    }
     try {
       const note = await Note.findByIdAndUpdate(
         {
           _id: noteId,
           userId: user._id,
         },
-        updateFields,
+        {isPinned},
         { new: true }
       );
 
@@ -288,7 +279,7 @@ app.put(
   }
 );
 // search note
-app.get("/search-note/query", authenticationToken, async (req, res) => {
+app.get("/search-notes/query", authenticationToken, async (req, res) => {
   const { user } = req.user;
   const  query  = req.query.search;
   // console.log(user._id);
