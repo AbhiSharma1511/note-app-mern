@@ -3,8 +3,9 @@ import { MdAdd, MdClose, MdRemove } from "react-icons/md";
 import { IoMdClose } from "react-icons/io";
 import axiosInstance from "../utils/axiosInstance";
 
-const AddEditNotes = ({ getAllNotes, addBtnClicked, onClose }) => {
+const AddEditNotes = ({ getAllNotes, addBtnClicked, onClose, showToastMessage }) => {
   const { isShown, type, data } = addBtnClicked;
+  // console.log(type);
   // console.log(data?.title);
   // console.log(data?.content);
   const [title, setTitle] = useState(data?.title || "");
@@ -14,8 +15,7 @@ const AddEditNotes = ({ getAllNotes, addBtnClicked, onClose }) => {
   const [error, setError] = useState();
 
   const handleAddNoteBtn = () => {
-    // console.log(type);
-    if (title.trim() || content.trim()) {
+    if (title.trim() && content.trim()) {
       addNewNote();
       onClose();
     } else {
@@ -57,6 +57,7 @@ const AddEditNotes = ({ getAllNotes, addBtnClicked, onClose }) => {
       if (response.data && response.data.note) {
         getAllNotes();
         onClose();
+        showToastMessage("Note Updated Successfully")
       }
     } catch (error) {
       if (
@@ -79,7 +80,9 @@ const AddEditNotes = ({ getAllNotes, addBtnClicked, onClose }) => {
     };
     try {
       const response = await axiosInstance.post("/add-note", requestData);
+      console.log(requestData);
       if (response.data && response.data.note) {
+        showToastMessage("Note Added Successfully");
         getAllNotes();
         onClose();
       }
@@ -176,10 +179,10 @@ const AddEditNotes = ({ getAllNotes, addBtnClicked, onClose }) => {
             <div className="flex justify-center">
               <button
                 type="button"
-                onClick={type == "ADD" ? handleAddNoteBtn : handleEditNoteBtn}
+                onClick={type == "Add" ? handleAddNoteBtn : handleEditNoteBtn}
                 className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
               >
-                {`${type== "Edit" ? "Update" : "Add"} Note`}
+                {`${type === "Edit" ? "Update" : "Add"} Note`}
               </button>
             </div>
           </div>

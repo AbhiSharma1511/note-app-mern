@@ -5,7 +5,9 @@ import { MdAdd } from "react-icons/md";
 import AddEditNotes from "./AddEditNotes.jsx";
 import Modal from "react-modal";
 import axiosInstance from "../utils/axiosInstance.js";
-import {useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import Toast from "../components/Toast.jsx";
+import EmptyCard from "../components/EmptyCard.jsx";
 
 Modal.setAppElement("#root");
 
@@ -14,6 +16,7 @@ const Home = () => {
   const navigate = useNavigate();
   const [allNotes, setAllNotes] = useState([]);
   const [error, setError] = useState(null);
+  const [toast, setToast] = useState(null);
   const [addItemDiv, setAddItemDiv] = useState({
     isShown: false,
     type: "",
@@ -24,8 +27,20 @@ const Home = () => {
     setAddItemDiv({ isShown: true, type: "Edit", data: noteDetails });
   };
 
-  const handleDelete = (noteDetails) => {
-    
+  const handleDelete = async (data) => {
+    const noteId = data._id;
+    try {
+      const response = await axiosInstance.delete(
+        `/delete-note/noteId?id=${noteId}`
+      );
+      if (response.data && !response.data.error) {
+        showToastMessage("Note deleted Successfully", "delete");
+        getAllNotes();
+      }
+    } catch (error) {
+      console.log(error.message);
+      setError(error.message);
+    }
   };
 
   // for getting user data
@@ -68,6 +83,13 @@ const Home = () => {
     setAddItemDiv({ isShown: true, type: "Add", data: null });
   };
 
+  const handleCloseToast = () => {
+    setToast({ isShown: false, message: "" });
+  };
+  const showToastMessage = (message, type) => {
+    setToast({ isShown: true, message, type });
+  };
+
   return (
     <>
       <Navbar user={userInfo} />
@@ -84,17 +106,13 @@ const Home = () => {
                 <NoteCard
                   data={item}
                   onEdit={() => handleEdit(item)}
-                  onDelete={() => handleDelete}
+                  onDelete={() => handleDelete(item)}
                   onPinNote={() => {}}
                 />
               </div>
             ))
           ) : (
-            <div className="w-screen flex justify-center items-center">
-              <h2 className="text-black sm:text-2xl text-md">
-                You did not create any note till yet, note it now 🙂
-              </h2>
-            </div>
+            <EmptyCard />
           )}
         </div>
       )}
@@ -117,8 +135,15 @@ const Home = () => {
             setAddItemDiv({ isShown: false, type: "", data: null });
           }}
           getAllNotes={getAllNotes}
+          showToastMessage={showToastMessage}
         />
       </Modal>
+      <Toast
+        isShown={toast && toast.isShown}
+        message={toast && toast.message}
+        type={toast && toast.type}
+        onClose={handleCloseToast}
+      />
     </>
   );
 };

@@ -5,16 +5,16 @@ import moment from "moment";
 const NoteCard = ({ data, onEdit, onDelete, onPinNote }) => {
   const { title, content, tags, isPinned } = data;
   return (
-    <div className="bg-white rounded-lg shadow-md hover:shadow-lg p-4 mb-4 min-w-min ease-in-out">
+    <div className="bg-slate-100 rounded-lg shadow-md hover:shadow-lg p-4 mb-1 hover:z-10 min-w-min ease-in-out">
       <div className="flex justify-between items-center mb-2">
         <div className="flex flex-col">
-          <h6 className="text-lg font-semibold text-gray-800">{title}</h6>
+          <h6 className="text-2xl font-semibold text-black">{title}</h6>
           <div className="gap-3 flex ">
-            <span className="text-xs text-gray-500">
+            {/* <span className="text-xs text-gray-500">
               Created At : {moment(data.createdAt).fromNow()}
-            </span>
+            </span> */}
             <span className="text-xs text-gray-500">
-              Updated At : {moment(data.updatedAt).fromNow()}
+              Created: {moment(data.updatedAt).fromNow()}
             </span>
           </div>
         </div>
@@ -27,7 +27,7 @@ const NoteCard = ({ data, onEdit, onDelete, onPinNote }) => {
       </div>
       <p className="text-gray-600">{content?.slice(0, 60)}</p>
       <div className="flex justify-between mt-2">
-        <div className="text-sm text-slate-500 flex gap-2">
+        <div className="text-sm text-blue-400 flex gap-2">
           {tags.map((tag, index) => {
             if (index === tags.length - 1)
               return <h2 key={index}>{`#${tag} `}</h2>;

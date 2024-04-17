@@ -287,5 +287,40 @@ app.put(
     }
   }
 );
+// search note
+app.get("/search-note/query", authenticationToken, async (req, res) => {
+  const { user } = req.user;
+  const  query  = req.query.search;
+  // console.log(user._id);
+  // console.log(query)
+  if (!query) {
+    return res
+      .status(400)
+      .json({ error: true, message: "Search query is required" });
+  }
+  try {
+    const matchNotes = await Note.find({
+      userId: user._id,
+      $or: [
+        { title: { $regex: new RegExp(query, "i") } },
+        { content: { $regex: new RegExp(query, "i") } },
+      ],
+    }).sort({
+      isPinned: -1,
+    });
+    if (!matchNotes) {
+      // console.log(notes);
+      return res
+        .status(400)
+        .json({ error: true, message: "Any note not found for this user" });
+    }
+    // console.log(notes);
+    return res
+      .status(200)
+      .json({ error: false, matchNotes, message: "Notes fetch successfully related to search query" });
+  } catch (error) {
+    return res.status(500).json({ error: false, message: "Server error" });
+  }
+});
 
 module.exports = app;
